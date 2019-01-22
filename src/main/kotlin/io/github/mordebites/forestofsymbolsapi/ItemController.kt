@@ -1,22 +1,23 @@
 package io.github.mordebites.forestofsymbolsapi
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus.CREATED
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class ItemController {
 
+    @Autowired
+    lateinit var itemRepository: ItemRepository
+
     @ResponseStatus(CREATED)
     @PostMapping("/items")
     fun createItem(@RequestBody item: Item): Item {
-        return Item(
-                id = Instant.now().toString(),
-                title = item.title,
-                type = item.type
-        )
+        return itemRepository.save(item)
+    }
+
+    @GetMapping("/items")
+    fun getItem(): List<Item> {
+        return itemRepository.findAll().toList()
     }
 }
