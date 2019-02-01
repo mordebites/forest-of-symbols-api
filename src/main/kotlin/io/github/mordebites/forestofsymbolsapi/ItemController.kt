@@ -3,6 +3,7 @@ package io.github.mordebites.forestofsymbolsapi
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 class ItemController {
@@ -14,6 +15,7 @@ class ItemController {
     @PostMapping("/items")
     fun createItem(@RequestBody item: Item): Item {
         return itemRepository.save(item)
+
     }
 
     @GetMapping("/items")

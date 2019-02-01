@@ -4,15 +4,13 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.Pattern
 
 @Entity
-data class Item constructor(
+data class Link constructor(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Long = -1,
-        val title: String,
+        val item1: Long,
+        val item2: Long,
         val type: String
 )

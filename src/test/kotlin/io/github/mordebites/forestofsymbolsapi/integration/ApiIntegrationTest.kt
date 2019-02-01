@@ -20,18 +20,19 @@ class ApiIntegrationTest {
 
     @Autowired
     lateinit var restTemplate: TestRestTemplate
-    val body = mapOf("title" to "foo", "type" to "bar")
+    val itemBody = mapOf("title" to "foo", "type" to "bar")
+    val linkBody = mapOf("type" to "ref", "item1" to "1", "item2" to "2")
 
     @Test
     fun shouldInsertAnItem() {
-        val postResponse = restTemplate.postForEntity("/items", body, ResponseBody::class.java)
+        val postResponse = restTemplate.postForEntity("/items", itemBody, ItemResponseBody::class.java)
 
         assertThat(postResponse.statusCode, equalTo(CREATED))
         assertThat(postResponse.body?.id, not(equalTo("-1")))
         assertThat(postResponse.body?.title, equalTo("foo"))
         assertThat(postResponse.body?.type, equalTo("bar"))
 
-        val getResponse = restTemplate.exchange("/items", HttpMethod.GET, HttpEntity.EMPTY, object : ParameterizedTypeReference<List<ResponseBody>>(){})
+        val getResponse = restTemplate.exchange("/items", HttpMethod.GET, HttpEntity.EMPTY, object : ParameterizedTypeReference<List<ItemResponseBody>>(){})
 
         assertThat(getResponse.statusCode, equalTo(OK))
         assertThat(getResponse.body?.size, equalTo(1))
@@ -40,4 +41,23 @@ class ApiIntegrationTest {
         assertThat(getResponse.body?.get(0)?.type, equalTo("bar"))
     }
 
+    @Test
+    fun shouldInsertALink() {
+        val postResponse = restTemplate.postForEntity("/links", linkBody, LinkResponseBody::class.java)
+
+        assertThat(postResponse.statusCode, equalTo(CREATED))
+        assertThat(postResponse.body?.id, not(equalTo("-1")))
+        assertThat(postResponse.body?.type, equalTo("ref"))
+        assertThat(postResponse.body?.item1, equalTo("1"))
+        assertThat(postResponse.body?.item2, equalTo("2"))
+
+        val getResponse = restTemplate.exchange("/links", HttpMethod.GET, HttpEntity.EMPTY, object : ParameterizedTypeReference<List<LinkResponseBody>>(){})
+
+        assertThat(getResponse.statusCode, equalTo(OK))
+        assertThat(getResponse.body?.size, equalTo(1))
+        assertThat(getResponse.body?.get(0)?.id, equalTo("1"))
+        assertThat(getResponse.body?.get(0)?.type, equalTo("ref"))
+        assertThat(getResponse.body?.get(0)?.item1, equalTo("1"))
+        assertThat(getResponse.body?.get(0)?.item2, equalTo("2"))
+    }
 }
