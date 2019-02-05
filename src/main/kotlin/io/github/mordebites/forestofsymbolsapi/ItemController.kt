@@ -13,7 +13,7 @@ class ItemController {
 
     @ResponseStatus(CREATED)
     @PostMapping("/items")
-    fun createItem(@RequestBody item: Item): Item {
+    fun createItem(@RequestBody @Valid item: Item): Item {
         return itemRepository.save(item)
 
     }

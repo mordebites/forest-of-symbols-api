@@ -42,6 +42,29 @@ class ApiIntegrationTest {
     }
 
     @Test
+    fun shouldValidateAnItem() {
+        val itemBodyNoType = mapOf("title" to "foo")
+        val postResponseNoType = restTemplate.postForEntity("/items", itemBodyNoType, Void::class.java)
+
+        assertThat(postResponseNoType.statusCode, equalTo(BAD_REQUEST))
+
+        val itemBodyNoTitle = mapOf("type" to "foo")
+        val postResponseNoTitle = restTemplate.postForEntity("/items", itemBodyNoTitle, Void::class.java)
+
+        assertThat(postResponseNoTitle.statusCode, equalTo(BAD_REQUEST))
+
+        val itemBodyEmptyTitle = mapOf("title" to "", "type" to "bar")
+        val postResponseEmptyTitle = restTemplate.postForEntity("/items", itemBodyEmptyTitle, Void::class.java)
+
+        assertThat(postResponseEmptyTitle.statusCode, equalTo(BAD_REQUEST))
+
+        val itemBodyEmptyType = mapOf("title" to "Hello", "type" to "")
+        val postResponseEmptyType = restTemplate.postForEntity("/items", itemBodyEmptyType, Void::class.java)
+
+        assertThat(postResponseEmptyType.statusCode, equalTo(BAD_REQUEST))
+    }
+
+    @Test
     fun shouldInsertALink() {
         val postResponse = restTemplate.postForEntity("/links", linkBody, LinkResponseBody::class.java)
 

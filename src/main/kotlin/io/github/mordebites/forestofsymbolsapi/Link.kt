@@ -10,7 +10,7 @@ data class Link constructor(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Long = -1,
-        val item1: Long,
-        val item2: Long,
+        val source: Long,
+        val dest: Long,
         val type: String
 )
