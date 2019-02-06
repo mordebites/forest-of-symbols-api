@@ -1,4 +1,4 @@
-package io.github.mordebites.forestofsymbolsapi
+package io.github.mordebites.forestofsymbolsapi.item
 
 import org.springframework.data.repository.CrudRepository
 

@@ -1,7 +1,7 @@
 package io.github.mordebites.forestofsymbolsapi.integration
 
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.not
+import org.hamcrest.CoreMatchers.*
+import org.junit.After
 import org.junit.Assert.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,8 +12,10 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus.*
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
+@ActiveProfiles("test")
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApiIntegrationTest {
@@ -21,7 +23,13 @@ class ApiIntegrationTest {
     @Autowired
     lateinit var restTemplate: TestRestTemplate
     val itemBody = mapOf("title" to "foo", "type" to "bar")
-    val linkBody = mapOf("type" to "ref", "item1" to "1", "item2" to "2")
+    val linkBody = mapOf("type" to "ref", "source" to "1", "dest" to "2")
+
+    @After
+    fun cleanup(){
+        restTemplate.delete("/items")
+        restTemplate.delete("/links")
+    }
 
     @Test
     fun shouldInsertAnItem() {
@@ -36,7 +44,7 @@ class ApiIntegrationTest {
 
         assertThat(getResponse.statusCode, equalTo(OK))
         assertThat(getResponse.body?.size, equalTo(1))
-        assertThat(getResponse.body?.get(0)?.id, equalTo("1"))
+        assertThat(getResponse.body?.get(0)?.id, not(nullValue()))
         assertThat(getResponse.body?.get(0)?.title, equalTo("foo"))
         assertThat(getResponse.body?.get(0)?.type, equalTo("bar"))
     }
@@ -66,13 +74,17 @@ class ApiIntegrationTest {
 
     @Test
     fun shouldInsertALink() {
-        val postResponse = restTemplate.postForEntity("/links", linkBody, LinkResponseBody::class.java)
+        val sourceItemResponse = restTemplate.postForEntity("/items", itemBody, ItemResponseBody::class.java)
+        val destItemResponse = restTemplate.postForEntity("/items", itemBody, ItemResponseBody::class.java)
+        val linkBody = mapOf("type" to "ref", "source" to sourceItemResponse.body?.id, "dest" to destItemResponse.body?.id)
 
-        assertThat(postResponse.statusCode, equalTo(CREATED))
-        assertThat(postResponse.body?.id, not(equalTo("-1")))
-        assertThat(postResponse.body?.type, equalTo("ref"))
-        assertThat(postResponse.body?.item1, equalTo("1"))
-        assertThat(postResponse.body?.item2, equalTo("2"))
+        val postLinkResponse = restTemplate.postForEntity("/links", linkBody, LinkResponseBody::class.java)
+
+        assertThat(postLinkResponse.statusCode, equalTo(CREATED))
+        assertThat(postLinkResponse.body?.id, not(equalTo("-1")))
+        assertThat(postLinkResponse.body?.type, equalTo("ref"))
+        assertThat(postLinkResponse.body?.source, equalTo("1"))
+        assertThat(postLinkResponse.body?.dest, equalTo("2"))
 
         val getResponse = restTemplate.exchange("/links", HttpMethod.GET, HttpEntity.EMPTY, object : ParameterizedTypeReference<List<LinkResponseBody>>(){})
 
@@ -80,7 +92,14 @@ class ApiIntegrationTest {
         assertThat(getResponse.body?.size, equalTo(1))
         assertThat(getResponse.body?.get(0)?.id, equalTo("1"))
         assertThat(getResponse.body?.get(0)?.type, equalTo("ref"))
-        assertThat(getResponse.body?.get(0)?.item1, equalTo("1"))
-        assertThat(getResponse.body?.get(0)?.item2, equalTo("2"))
+        assertThat(getResponse.body?.get(0)?.source, equalTo("1"))
+        assertThat(getResponse.body?.get(0)?.dest, equalTo("2"))
+    }
+
+    @Test
+    fun shouldFailWithInvalidLink() {
+        val postResponse = restTemplate.postForEntity("/links", linkBody, LinkResponseBody::class.java)
+
+        assertThat(postResponse.statusCode, equalTo(NOT_FOUND))
     }
 }

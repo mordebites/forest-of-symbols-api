@@ -1,4 +1,4 @@
-package io.github.mordebites.forestofsymbolsapi
+package io.github.mordebites.forestofsymbolsapi.item
 
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue

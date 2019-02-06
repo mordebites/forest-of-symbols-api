@@ -1,6 +1,7 @@
-package io.github.mordebites.forestofsymbolsapi
+package io.github.mordebites.forestofsymbolsapi.item
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -9,17 +10,23 @@ import javax.validation.Valid
 class ItemController {
 
     @Autowired
-    lateinit var itemRepository: ItemRepository
+    lateinit var itemService: ItemService
 
     @ResponseStatus(CREATED)
     @PostMapping("/items")
     fun createItem(@RequestBody @Valid item: Item): Item {
-        return itemRepository.save(item)
+        return itemService.storeItem(item)
 
     }
 
     @GetMapping("/items")
     fun getItem(): List<Item> {
-        return itemRepository.findAll().toList()
+        return itemService.loadItems()
+    }
+
+    @Profile("test")
+    @DeleteMapping("/items")
+    fun deleteAll() {
+        itemService.deleteAll()
     }
 }
