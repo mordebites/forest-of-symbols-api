@@ -19,4 +19,5 @@ data class Item constructor(
 
         @field:NotBlank
         val type: String
+
 )

@@ -29,7 +29,7 @@ class LinkService {
     }
 
     private fun validateLink(link: Link) {
-        if (!itemService.loadById(link.source) || !itemService.loadById(link.dest)) {
+        if (!itemService.checkItemPresenceById(link.source) || !itemService.checkItemPresenceById(link.dest)) {
             throw ItemNotFoundException("One of the items was not found")
         }
     }

@@ -17,7 +17,7 @@ class ItemService {
         return itemRepository.findAll().toList()
     }
 
-    fun loadById(id:Long): Boolean {
+    fun checkItemPresenceById(id:Long): Boolean {
         return itemRepository.existsById(id)
     }
 
