@@ -30,7 +30,7 @@ class ItemServiceTest {
 
   @Test
   fun `should create an item`() {
-    val item = Item("American Psyco", "Book")
+    val item = Item("American Psycho", "Book")
 
     itemService.createItem(item)
     val lastItem = itemRepository.findAll().last()

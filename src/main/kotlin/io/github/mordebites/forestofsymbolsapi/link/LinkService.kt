@@ -3,7 +3,6 @@ package io.github.mordebites.forestofsymbolsapi.link
 import io.github.mordebites.forestofsymbolsapi.item.ItemNotFoundException
 import io.github.mordebites.forestofsymbolsapi.item.ItemService
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestBody
 
 @Service
 class LinkService(
@@ -12,7 +11,7 @@ class LinkService(
 ) {
 
   fun createLink(
-    @RequestBody link: Link
+    link: Link
   ): Link {
     validateLink(link)
     return linkRepository.save(link)
@@ -26,10 +25,13 @@ class LinkService(
     linkRepository.deleteAll()
   }
 
+  fun linkExistsById(id: Long): Boolean {
+    return linkRepository.existsById(id)
+  }
+
   private fun validateLink(link: Link) {
     if (!itemService.itemExistsById(link.source) || !itemService.itemExistsById(link.dest)) {
       throw ItemNotFoundException("One of the items was not found!")
     }
   }
-
 }
