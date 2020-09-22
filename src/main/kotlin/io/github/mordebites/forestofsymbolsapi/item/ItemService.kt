@@ -1,28 +1,24 @@
 package io.github.mordebites.forestofsymbolsapi.item
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ItemService {
+class ItemService(private val itemRepository: ItemRepository) {
 
-    @Autowired
-    lateinit var itemRepository: ItemRepository
+  fun createItem(item: Item): Item {
+    return itemRepository.save(item)
+  }
 
-    fun storeItem(item: Item): Item {
-        return itemRepository.save(item)
-    }
+  fun getAllItems(): List<Item> {
+    return itemRepository.findAll().toList()
+  }
 
-    fun loadItems(): List<Item> {
-        return itemRepository.findAll().toList()
-    }
+  fun itemExistsById(id: Long): Boolean {
+    return itemRepository.existsById(id)
+  }
 
-    fun checkItemPresenceById(id:Long): Boolean {
-        return itemRepository.existsById(id)
-    }
-
-    fun deleteAll() {
-        itemRepository.deleteAll()
-    }
+  fun deleteAllItems() {
+    itemRepository.deleteAll()
+  }
 
 }

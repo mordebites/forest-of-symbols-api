@@ -2,36 +2,34 @@ package io.github.mordebites.forestofsymbolsapi.link
 
 import io.github.mordebites.forestofsymbolsapi.item.ItemNotFoundException
 import io.github.mordebites.forestofsymbolsapi.item.ItemService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.RequestBody
 
 @Service
-class LinkService {
+class LinkService(
+  private val linkRepository: LinkRepository,
+  private val itemService: ItemService
+) {
 
-    @Autowired
-    lateinit var linkRepository: LinkRepository
+  fun createLink(
+    @RequestBody link: Link
+  ): Link {
+    validateLink(link)
+    return linkRepository.save(link)
+  }
 
-    @Autowired
-    lateinit var itemService: ItemService
+  fun getAllLinks(): List<Link> {
+    return linkRepository.findAll().toList()
+  }
 
-    fun storeLink(@RequestBody link: Link): Link {
-        validateLink(link)
-        return linkRepository.save(link)
+  fun deleteAllLinks() {
+    linkRepository.deleteAll()
+  }
+
+  private fun validateLink(link: Link) {
+    if (!itemService.itemExistsById(link.source) || !itemService.itemExistsById(link.dest)) {
+      throw ItemNotFoundException("One of the items was not found!")
     }
-
-    fun loadLinks(): List<Link> {
-        return linkRepository.findAll().toList()
-    }
-
-    fun deleteAll() {
-        linkRepository.deleteAll()
-    }
-
-    private fun validateLink(link: Link) {
-        if (!itemService.checkItemPresenceById(link.source) || !itemService.checkItemPresenceById(link.dest)) {
-            throw ItemNotFoundException("One of the items was not found")
-        }
-    }
+  }
 
 }

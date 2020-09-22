@@ -15,67 +15,67 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @ActiveProfiles("test")
 @RunWith(SpringRunner::class)
-@SpringBootTest()
+@SpringBootTest
 class ItemServiceTest {
-    @Autowired
-    lateinit var itemRepository: ItemRepository
+  @Autowired
+  lateinit var itemRepository: ItemRepository
 
-    @Autowired
-    lateinit var itemService: ItemService
+  @Autowired
+  lateinit var itemService: ItemService
 
+  @Before
+  fun setup() {
+    itemRepository.deleteAll()
+  }
 
-    @Test
-    fun shouldStoreAnItem() {
-        val desiredTitle = "American Psycho"
-        val desiredType = "Book"
-        val item = Item(-1, desiredTitle, desiredType)
+  @Test
+  fun `should create an item`() {
+    val item = Item("American Psyco", "Book")
 
-        itemService.storeItem(item)
-        val lastItem = itemRepository.findAll().last()
-        assertEquals(desiredTitle, lastItem.title)
-        assertEquals(desiredType, lastItem.type)
+    itemService.createItem(item)
+    val lastItem = itemRepository.findAll().last()
+    assertEquals(item.title, lastItem.title)
+    assertEquals(item.type, lastItem.type)
+  }
+
+  @Test
+  fun `should find all items`() {
+    val items = listOf(
+      Item("Il nome della rosa", "Book"),
+      Item("Om Shanti Om", "Movie"),
+      Item("Vento d'estate", "Song")
+    )
+
+    for (item in items) {
+      itemRepository.save(item)
     }
 
-    @Test
-    fun shouldLoadAllItems() {
-        val title = "American Psycho"
-        val type = "Book"
-        val item = Item(-1, title, type)
+    val allItems = itemService.getAllItems()
+    assertEquals(items, allItems)
+  }
 
-        val maxItems = 3
-        for (i in 1..maxItems) {
-            itemRepository.save(item)
-        }
+  @Test
+  fun `should check item exists by id`() {
+    val item = Item("American Psycho", "Book")
+    itemRepository.save(item)
 
-        val allItems = itemService.loadItems()
-        assertEquals(maxItems, allItems.size)
-        for (item in allItems) {
-            assertEquals(title, item.title)
-            assertEquals(type, item.type)
-        }
+    assertTrue(itemService.itemExistsById(item.id))
+  }
+
+  @Test
+  fun `should delete all items`() {
+    val items = listOf(
+      Item("Il nome della rosa", "Book"),
+      Item("Om Shanti Om", "Movie"),
+      Item("Vento d'estate", "Song")
+    )
+    for (item in items) {
+      itemRepository.save(item)
     }
+    assertEquals(items.size, itemRepository.findAll().count())
 
-    @Test
-    fun shouldCheckItemPresenceById() {
-        val desiredTitle = "American Psycho"
-        val desiredType = "Book"
-        val item = Item(-1, desiredTitle, desiredType)
-        val savedItem = itemRepository.save(item)
+    itemService.deleteAllItems()
 
-        assertTrue(itemService.checkItemPresenceById(savedItem.id))
-    }
-
-    @Test
-    fun shouldDeleteAllItems() {
-        val item = Item(-1, "American Psycho", "Book")
-        val maxItems = 3
-        for (i in 1..maxItems) {
-            itemRepository.save(item)
-        }
-        assertEquals(maxItems, itemRepository.findAll().count())
-
-        itemService.deleteAll()
-
-        assertTrue(itemRepository.findAll().none())
-    }
+    assertTrue(itemRepository.findAll().none())
+  }
 }
